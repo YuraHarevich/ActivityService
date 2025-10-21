@@ -1,0 +1,372 @@
+openapi: 3.0.3
+info:
+  title: Activity Api
+  version: 1.0.0
+  description: API handling social media actions
+
+paths:
+  /api/v1/actions/post/{id}:
+    get:
+      summary: Get post activities
+      description: Retrieve all likes and comments for a specific post
+      tags:
+        - Activities
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+          description: Post ID
+      responses:
+        '200':
+          description: Activities for post retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/actions/like:
+    get:
+      summary: Get like by ID
+      description: Retrieve a specific like by its ID
+      tags:
+        - Likes
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "507f1f77bcf86cd799439011"
+          description: Like ObjectId
+      responses:
+        '200':
+          description: Like found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a like
+      description: Like a post
+      tags:
+        - Likes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LikeRequest'
+      responses:
+        '200':
+          description: Post was liked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/v1/actions/comment:
+    get:
+      summary: Get comment by ID
+      description: Retrieve a specific comment by its ID
+      tags:
+        - Comments
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+            example: "507f1f77bcf86cd799439012"
+          description: Comment ObjectId
+      responses:
+        '200':
+          description: Comment found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a comment
+      description: Leave a comment on a post
+      tags:
+        - Comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+      responses:
+        '200':
+          description: Comment was left successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+components:
+  schemas:
+    # Request DTOs
+    LikeRequest:
+      type: object
+      required:
+        - userId
+        - postId
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: User ID who is liking the post
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+          description: Post ID being liked
+
+    CommentRequest:
+      type: object
+      required:
+        - payload
+        - posterId
+        - postId
+      properties:
+        payload:
+          type: string
+          example: "This is a great post!"
+          description: Comment content
+          maxLength: 1000
+        posterId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: User ID who is posting the comment
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+          description: Post ID being commented on
+
+    # Response DTOs
+    ActivityResponse:
+      type: object
+      required:
+        - postId
+      properties:
+        numberOfLikes:
+          type: integer
+          minimum: 0
+          example: 42
+          description: Total number of likes for the post
+        numberOfComments:
+          type: integer
+          minimum: 0
+          example: 15
+          description: Total number of comments for the post
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+          description: List of comments (optional, might be empty)
+        likes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Like'
+          description: List of likes (optional, might be empty)
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+          description: Post ID
+
+    LikeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          example: "507f1f77bcf86cd799439011"
+          description: Like ObjectId
+        userId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: User ID who liked the post
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+          description: Post ID that was liked
+        likedAt:
+          type: string
+          format: date-time
+          example: "2023-10-05T12:00:00Z"
+          description: When the like was created
+
+    CommentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          example: "507f1f77bcf86cd799439012"
+          description: Comment ObjectId
+        payload:
+          type: string
+          example: "This is a great post!"
+          description: Comment content
+        posterId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          description: User ID who posted the comment
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+          description: Post ID that was commented on
+        leavedAt:
+          type: string
+          format: date-time
+          example: "2023-10-05T12:00:00Z"
+          description: When the comment was created
+
+    # Database entities (for nested objects in ActivityResponse)
+    Like:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          example: "507f1f77bcf86cd799439011"
+        userId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        likedAt:
+          type: string
+          format: date-time
+          example: "2023-10-05T12:00:00Z"
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^[a-fA-F0-9]{24}$'
+          example: "507f1f77bcf86cd799439012"
+        payload:
+          type: string
+          example: "This is a great post!"
+        posterId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        postId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        leavedAt:
+          type: string
+          format: date-time
+          example: "2023-10-05T12:00:00Z"
+
+    # Error response
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-05T12:00:00Z"
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Not Found"
+        message:
+          type: string
+          example: "Resource not found"
+        path:
+          type: string
+          example: "/api/v1/actions/like"
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-10-05T12:00:00Z"
+            status: 404
+            error: "Not Found"
+            message: "Like with id '507f1f77bcf86cd799439011' not found"
+            path: "/api/v1/actions/like"
+
+    BadRequest:
+      description: Bad request - validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            timestamp: "2023-10-05T12:00:00Z"
+            status: 400
+            error: "Bad Request"
+            message: "Validation failed"
+            path: "/api/v1/actions/like"
+            details:
+              - field: "userId"
+                message: "must not be null"
+
+  parameters:
+    PostIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: "550e8400-e29b-41d4-a716-446655440000"
+      description: Post ID
+
+    ObjectIdQuery:
+      name: id
+      in: query
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-fA-F0-9]{24}$'
+        example: "507f1f77bcf86cd799439011"
+      description: ObjectId
+
+tags:
+  - name: Activities
+    description: Post activities operations
+  - name: Likes
+    description: Like management operations
+  - name: Comments
+    description: Comment management operations

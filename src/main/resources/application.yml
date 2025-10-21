@@ -1,0 +1,26 @@
+server:
+  port: 8040
+spring:
+  application:
+    name: activity-service
+  data:
+    mongodb:
+      port: 27017
+      host: localhost
+      database: activities
+      uri: mongodb://localhost:27017/activities
+
+  kafka:
+    topic:
+      activity: activity-topic
+    producer:
+      bootstrap-server: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      observation-enabled: true
+      properties:
+        spring.json.type.mapping: activityResponse:ru.kharevich.activityservice.dto.response.ActivityResponse
+
+app:
+  scheduling:
+    frequency_of_actions_uploading_in_millis: 10000
