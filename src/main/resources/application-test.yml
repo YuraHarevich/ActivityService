@@ -1,0 +1,15 @@
+server:
+  port: 8040
+spring:
+  application:
+    name: activity-service
+  data:
+    mongodb:
+      port: 27017
+      host: localhost
+      database: activities
+      uri: mongodb://localhost:27017/activities
+
+app:
+  scheduling:
+    frequency_of_actions_uploading_in_millis: 10000
