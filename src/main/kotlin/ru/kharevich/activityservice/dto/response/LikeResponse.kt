@@ -14,14 +14,6 @@ import java.util.UUID
  */
 data class LikeResponse(
 
-    @get:Pattern(regexp="^[a-fA-F0-9]{24}$")
-    @get:JsonProperty("id") val id: String? = null,
+    val isLiked : Boolean
 
-    @get:JsonProperty("userId") val userId: UUID? = null,
-
-    @get:JsonProperty("postId") val postId: UUID? = null,
-
-    @get:JsonProperty("likedAt") val likedAt: OffsetDateTime? = null
-) {
-
-}
+)

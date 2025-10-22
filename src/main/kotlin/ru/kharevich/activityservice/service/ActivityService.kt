@@ -11,7 +11,7 @@ import java.util.UUID
 interface ActivityService {
     fun getActionsByPost(postId: UUID): ActivityResponse
     fun getLikesByPostId(id: UUID, pageNumber: Int, size: Int): PageableResponse<LikeResponse>
-    fun likePost(likeRequest:LikeRequest)
+    fun likePost(likeRequest:LikeRequest): LikeResponse
     fun getCommentsByPost(id: UUID, pageNumber: Int, size: Int): PageableResponse<CommentResponse>
     fun postComment(commentRequest: CommentRequest): CommentResponse
 }

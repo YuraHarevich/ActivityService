@@ -17,7 +17,6 @@ import java.util.UUID
     injectionStrategy = InjectionStrategy.CONSTRUCTOR
 )
 interface ActivityMapper {
-    fun toLikeResponse(like: Like): LikeResponse
     fun toCommentResponse(comment: Comment): CommentResponse
     fun toActivityResponse(postId: UUID, numberOfLikes: Long, numberOfComments: Long): ActivityResponse;
     fun toLike(request: LikeRequest): Like;
