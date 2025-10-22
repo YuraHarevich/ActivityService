@@ -57,7 +57,7 @@ class LikesApiController(
         consumes = ["application/json"]
     )
     @ResponseStatus(HttpStatus.ACCEPTED)
-    fun apiV1ActionsLikePost( @Valid @RequestBody likeRequest: LikeRequest) {
-        activityService.likePost(likeRequest);
+    fun apiV1ActionsLikePost( @Valid @RequestBody likeRequest: LikeRequest): LikeResponse {
+        return activityService.likePost(likeRequest);
     }
 }

@@ -1,7 +1,6 @@
 package ru.kharevich.activityservice.service.impl
 
 import lombok.RequiredArgsConstructor
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import ru.kharevich.activityservice.dto.request.CommentRequest
@@ -43,16 +42,22 @@ class ActivityServiceImpl(
         return pageMapper.toResponse(likes)
     }
 
-    override fun likePost(likeRequest: LikeRequest) {
+    override fun likePost(likeRequest: LikeRequest): LikeResponse {
         var optLike = likeRepository.findByPostIdAndUserId(likeRequest.postId, likeRequest.userId)
-        if(optLike.isPresent){
-            likeRepository.delete(optLike.get())
-        }
-        if(optLike.isEmpty){
-            likeRepository.save(activityMapper.toLike(likeRequest))
+        var likeResponse = LikeResponse(true)
+        when {
+            optLike.isPresent -> {
+                likeRepository.delete(optLike.get())
+                likeResponse = LikeResponse(false)
+            }
+            optLike.isEmpty -> {
+                likeRepository.save(activityMapper.toLike(likeRequest))
+                likeResponse = LikeResponse(true)
+            }
         }
         val activityResponse = getActionsByPost(likeRequest.postId)
         activityMessageProducer.sendMessage(activityResponse)
+        return likeResponse
     }
 
     override fun getCommentsByPost(
